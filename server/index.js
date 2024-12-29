@@ -7,12 +7,15 @@ dotenv.config()
 
 
 const app = express()
-app.use(express.json())
 app.use(cors({
-    origin:"https://todo-app-front-flame.vercel.app", // Allow frontend origin
-    methods: ["GET", "POST", "PUT", "DELETE"], // Add all required methods
+    origin: [
+        "https://todo-app-front-flame.vercel.app", // Primary frontend domain
+        "https://todo-app-front-jl72czip0-niraj-prajapatis-projects-232266b5.vercel.app" // Secondary frontend domain
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"], // Allow required methods
     credentials: true // Allow cookies if needed
 }));
+
 
 
 app.get('/get', (req, res) => {
