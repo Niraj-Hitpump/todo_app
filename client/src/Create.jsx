@@ -19,7 +19,7 @@ const Create = ({ setTodos, todos }) => {
         setLoading(true);
 
         axios
-            .post("http://localhost:4000/add", { task: truncatedTask })
+            .post("https://todo-app-ten-zeta-55.vercel.app/add", { task: truncatedTask })
             .then((res) => {
                 setTodos([...todos, { _id: res.data._id, task: truncatedTask, done: false }]);
                 setTask(""); // Clear input after adding

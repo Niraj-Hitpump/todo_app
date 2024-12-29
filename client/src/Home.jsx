@@ -14,7 +14,7 @@ const Home = () => {
     // Fetch todos on component mount
     useEffect(() => {
         axios
-            .get("http://localhost:4000/get") // Corrected URL format
+            .get("https://todo-app-ten-zeta-55.vercel.app/get") // Corrected URL format
             .then((res) => {
                 if (Array.isArray(res.data)) {
                     setTodos(res.data); // Set todos if response is an array
@@ -32,7 +32,7 @@ const Home = () => {
     // Toggle the `done` status of a todo
     const handleEdit = (id) => {
         axios
-            .put(`http://localhost:4000/update/${id}`) // Corrected URL
+            .put(`https://todo-app-ten-zeta-55.vercel.app/update/${id}`) // Corrected URL
             .then(() => {
                 setTodos((prevTodos) =>
                     prevTodos.map((todo) =>
@@ -48,7 +48,7 @@ const Home = () => {
     // Delete a todo
     const handleDelete = (id) => {
         axios
-            .delete(`http://localhost:4000/delete/${id}`) // Corrected URL
+            .delete(`https://todo-app-ten-zeta-55.vercel.app/delete/${id}`) // Corrected URL
             .then(() => {
                 setTodos((prevTodos) =>
                     prevTodos.filter((todo) => todo._id !== id)
