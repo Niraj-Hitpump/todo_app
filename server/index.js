@@ -1,78 +1,85 @@
-import express from 'express'
-import cors from 'cors'
-import mongoose from 'mongoose'
-import todomodel from './Models/Todo.js'
-import dotenv from 'dotenv'
-dotenv.config()
+import express from 'express';
+import cors from 'cors';
+import mongoose from 'mongoose';
+import todomodel from './Models/Todo.js';
+import dotenv from 'dotenv';
 
+dotenv.config();
 
-const app = express()
+const app = express();
+
+// Middleware
 app.use(cors({
-    origin: [
-        "https://todo-app-front-flame.vercel.app",
-        "https://todo-app-front-jl72czip0-niraj-prajapatis-projects-232266b5.vercel.app"
-    ],
+    origin: "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
+    credentials: true,
 }));
+app.use(express.json()); // Parse JSON request bodies
 
+// Routes
 
-
-app.get('/get', (req, res) => {
-    todomodel.find()
-    .then(result => {
-        console.log(result);  // Log to check data
-        result.forEach(task => {
-            if (task.task.length > 30) {
-                task.task = task.task.substring(0, 30) + '...';
+// Fetch all todos
+app.get('/get', async (req, res) => {
+    try {
+        const todos = await todomodel.find();
+        todos.forEach(todo => {
+            if (todo.task.length > 30) {
+                todo.task = `${todo.task.substring(0, 30)}...`;
             }
         });
-        res.json(result);
-    })
-    .catch(err => res.json(err));
+        res.json(todos);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 });
 
+// Add a new todo
+app.post('/add', async (req, res) => {
+    try {
+        const { task } = req.body;
+        if (!task) return res.status(400).json({ error: "Task cannot be empty" });
 
-
-app.put('/update/:id', (req, res) => {  // Make sure ':id' is in the route path
-    const { id } = req.params;  // Get the id from the URL
-    const { task, done } = req.body;  // Get task and done from request body
-
-    // Find the todo by id and update its task and done status
-    todomodel.findByIdAndUpdate(id, { task, done }, { new: true })  // { new: true } ensures it returns the updated document
-        .then(result => res.json(result))  // Send the updated task as a response
-        .catch(err => res.status(400).json({ error: err.message }));  // Handle error
+        const newTodo = await todomodel.create({ task });
+        res.status(201).json(newTodo);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Failed to create task" });
+    }
 });
 
+// Update a todo
+app.put('/update/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { task, done } = req.body;
 
-app.delete('/delete/:id', (req, res) => {  // Corrected route path
-    const { id } = req.params;
-    todomodel.findByIdAndDelete({ _id: id })
-        .then(result => res.json(result))
-        .catch(err => res.json(err))
+        const updatedTodo = await todomodel.findByIdAndUpdate(id, { task, done }, { new: true });
+        if (!updatedTodo) return res.status(404).json({ error: "Todo not found" });
+
+        res.json(updatedTodo);
+    } catch (err) {
+        console.error(err);
+        res.status(400).json({ error: err.message });
+    }
 });
 
+// Delete a todo
+app.delete('/delete/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deletedTodo = await todomodel.findByIdAndDelete(id);
+        if (!deletedTodo) return res.status(404).json({ error: "Todo not found" });
 
-app.post('/add',(req,res)=>{
-    const task=req.body.task;
-    todomodel.create({
-        task:task
-    }).then((result)=>{
-        res.json(result)
-    }).catch((err)=>{
-        res.json(err)
-    })
-})
+        res.json(deletedTodo);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Failed to delete task" });
+    }
+});
 
-
-
+// Start server and connect to MongoDB
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-    mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('Connected to MongoDB'))
-    .catch((error) => console.error('Error connecting to MongoDB:', error));
-})
-
-
-
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => app.listen(PORT, () => console.log(`Server running on port ${PORT}`)))
+    .catch(err => console.error('Error connecting to MongoDB:', err));

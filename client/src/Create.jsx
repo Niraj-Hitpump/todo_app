@@ -6,30 +6,33 @@ const Create = ({ setTodos, todos }) => {
     const [task, setTask] = useState("");
     const [loading, setLoading] = useState(false);
 
-    // Function to handle adding a task
-    const handleAdd = () => {
-        if (!task.trim()) {
+    const handleAdd = async () => {
+        const trimmedTask = task.trim();
+
+        if (!trimmedTask) {
             toast.error("Task cannot be empty");
             return;
         }
 
-        // Truncate task if longer than 30 characters
-        const truncatedTask = task.length > 30 ? task.substring(0, 30) + "..." : task;
+        if (todos.some((todo) => todo.task === trimmedTask)) {
+            toast.warn("Task already exists");
+            return;
+        }
 
         setLoading(true);
 
-        axios
-            .post("https://todo-app-ten-zeta-55.vercel.app/add", { task: truncatedTask })
-            .then((res) => {
-                setTodos([...todos, { _id: res.data._id, task: truncatedTask, done: false }]);
-                setTask(""); // Clear input after adding
-                toast.success("Todo added successfully");
-            })
-            .catch((err) => {
-                console.error("Error adding todo:", err);
-                toast.error("Failed to add todo. Please try again.");
-            })
-            .finally(() => setLoading(false));
+        try {
+            const res = await axios.post("http://localhost:4000/add", { task: trimmedTask });
+            const newTodo = res.data;
+            setTodos((prevTodos) => [...prevTodos, newTodo]);
+            setTask("");
+            toast.success("Todo added successfully");
+        } catch (err) {
+            console.error("Error adding todo:", err);
+            toast.error("Failed to add todo. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -40,13 +43,15 @@ const Create = ({ setTodos, todos }) => {
                 placeholder="Add a task"
                 value={task}
                 onChange={(e) => setTask(e.target.value)}
-                disabled={loading} // Disable input while loading
+                disabled={loading}
+                aria-label="Add a new task"
             />
             <button
                 type="button"
                 className="create_button"
                 onClick={handleAdd}
-                disabled={loading} // Disable button during loading
+                disabled={loading}
+                aria-label="Add task button"
             >
                 {loading ? "Adding..." : "Add"}
             </button>

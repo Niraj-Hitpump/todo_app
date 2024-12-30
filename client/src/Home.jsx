@@ -8,19 +8,18 @@ import {
 } from "react-icons/bs";
 
 const Home = () => {
-    const [todos, setTodos] = useState([]); // Initial state set to an empty array
-    const [error, setError] = useState(null); // State for tracking errors
+    const [todos, setTodos] = useState([]);
+    const [error, setError] = useState(null);
 
-    // Fetch todos on component mount
     useEffect(() => {
         axios
-            .get("https://todo-app-ten-zeta-55.vercel.app/get") // Corrected URL format
+            .get("http://localhost:4000/get")
             .then((res) => {
                 if (Array.isArray(res.data)) {
-                    setTodos(res.data); // Set todos if response is an array
+                    setTodos(res.data);
                 } else {
                     console.error("Unexpected response format:", res.data);
-                    setTodos([]); // Fallback to an empty array
+                    setTodos([]);
                 }
             })
             .catch((err) => {
@@ -29,14 +28,16 @@ const Home = () => {
             });
     }, []);
 
-    // Toggle the `done` status of a todo
     const handleEdit = (id) => {
+        const todoToUpdate = todos.find((todo) => todo._id === id);
+        if (!todoToUpdate) return;
+
         axios
-            .put(`https://todo-app-ten-zeta-55.vercel.app/update/${id}`) // Corrected URL
-            .then(() => {
+            .put(`http://localhost:4000/update/${id}`, { task: todoToUpdate.task, done: !todoToUpdate.done })
+            .then((res) => {
                 setTodos((prevTodos) =>
                     prevTodos.map((todo) =>
-                        todo._id === id ? { ...todo, done: !todo.done } : todo
+                        todo._id === id ? res.data : todo
                     )
                 );
             })
@@ -45,10 +46,9 @@ const Home = () => {
             });
     };
 
-    // Delete a todo
     const handleDelete = (id) => {
         axios
-            .delete(`https://todo-app-ten-zeta-55.vercel.app/delete/${id}`) // Corrected URL
+            .delete(`http://localhost:4000/delete/${id}`)
             .then(() => {
                 setTodos((prevTodos) =>
                     prevTodos.filter((todo) => todo._id !== id)
