@@ -9,11 +9,19 @@ dotenv.config();
 const app = express();
 
 // Middleware
+const allowedOrigins = ["https://todo-app-niraj.vercel.app", "http://localhost:3000"];
 app.use(cors({
-    origin: "https://todo-app-niraj.vercel.app",
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
+    credentials: true
 }));
+
 app.use(express.json()); // Parse JSON request bodies
 
 // Routes
