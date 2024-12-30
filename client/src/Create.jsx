@@ -1,3 +1,4 @@
+// Create.jsx
 import { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -22,7 +23,7 @@ const Create = ({ setTodos, todos }) => {
         setLoading(true);
 
         try {
-            const res = await axios.post("https://todo-app-niraj.vercel.app/add", { task: trimmedTask });
+            const res = await axios.post("http://localhost:4000/add", { task: trimmedTask });
             const newTodo = res.data;
             setTodos((prevTodos) => [...prevTodos, newTodo]);
             setTask("");
