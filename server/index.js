@@ -18,9 +18,16 @@ app.use(express.json()); // Parse JSON request bodies
 
 // Routes
 
-app.get("/", (req, res) => {
-    res.send("Deployed Successfully.");
-})
+app.get("/", async (req, res) => {
+    try {
+        const admin = mongoose.connection.db.admin();
+        const dbs = await admin.listDatabases();
+        res.json({ message: "Deployed Successfully.", databases: dbs.databases });
+    } catch (err) {
+        console.error("Error fetching database list:", err);
+        res.status(500).json({ error: "Failed to fetch database list" });
+    }
+});
 
 // Fetch all todos
 app.get('/get', async (req, res) => {
@@ -83,7 +90,7 @@ app.delete('/delete/:id', async (req, res) => {
 });
 
 // Start server and connect to MongoDB
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3000;
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => app.listen(PORT, () => console.log(`Server running on port ${PORT}`)))
     .catch(err => console.error('Error connecting to MongoDB:', err));
