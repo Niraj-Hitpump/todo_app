@@ -13,7 +13,7 @@ const Home = () => {
 
     useEffect(() => {
         axios
-            .get("http://localhost:4000/get")
+            .get("https://todo-app-niraj.vercel.app/get")
             .then((res) => {
                 if (Array.isArray(res.data)) {
                     setTodos(res.data);
@@ -33,7 +33,7 @@ const Home = () => {
         if (!todoToUpdate) return;
 
         axios
-            .put(`http://localhost:4000/update/${id}`, { task: todoToUpdate.task, done: !todoToUpdate.done })
+            .put(`https://todo-app-niraj.vercel.app/update/${id}`, { task: todoToUpdate.task, done: !todoToUpdate.done })
             .then((res) => {
                 setTodos((prevTodos) =>
                     prevTodos.map((todo) =>
@@ -48,7 +48,7 @@ const Home = () => {
 
     const handleDelete = (id) => {
         axios
-            .delete(`http://localhost:4000/delete/${id}`)
+            .delete(`https://todo-app-niraj.vercel.app/delete/${id}`)
             .then(() => {
                 setTodos((prevTodos) =>
                     prevTodos.filter((todo) => todo._id !== id)
