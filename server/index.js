@@ -10,13 +10,17 @@ const app = express();
 
 // Middleware
 app.use(cors({
-    origin: "http://todo-app-niraj.vercel.app",
+    origin: "https://todo-app-niraj.vercel.app",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
 }));
 app.use(express.json()); // Parse JSON request bodies
 
 // Routes
+
+app.get("/", (req, res) => {
+    res.send("Deployed Successfully.");
+})
 
 // Fetch all todos
 app.get('/get', async (req, res) => {
